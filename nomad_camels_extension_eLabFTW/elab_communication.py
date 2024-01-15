@@ -1,7 +1,10 @@
 import elabapi_python as elabapi
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QComboBox, QTextEdit
 
+import sys
+sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/')
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit, QGridLayout, QDialogButtonBox
+from nomad_camels.utility import variables_handling
 
 
 configuration = elabapi.Configuration()
@@ -56,6 +59,24 @@ def get_elab_settings():
         elab_settings['url'] = ''
     return elab_settings
 
+def get_user_information(parent=None):
+    """Returns the user information from eLabFTW."""
+    ensure_login(parent)
+    user = elabapi.UsersApi(api_client).read_user('me')
+    return user
+
+def get_items(parent=None):
+    """Returns the items from eLabFTW."""
+    ensure_login(parent)
+    items = elabapi.ItemsApi(api_client).read_items()
+    return items
+
+def get_item_types(parent=None):
+    """Returns the item types from eLabFTW."""
+    ensure_login(parent)
+    item_types = elabapi.ItemsTypesApi(api_client).read_items_types()
+    return item_types
+
 
 class LoginDialog(QDialog):
     """This UI dialog handles the login to elabFTW."""
@@ -90,13 +111,61 @@ class LoginDialog(QDialog):
         self.token = self.lineEdit_token.text()
         super().accept()
 
-
+class ItemSelector(QDialog):
+    """This UI dialog handles the selection of an item from eLabFTW."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        items = get_items()
+        if not items:
+            raise Exception('No Items found!')
+        self.item_metadata = []
+        self.item_names = []
+        self.item_types = []
+        for item in items:
+            self.item_metadata.append(item.__dict__)
+            self.item_names.append(item.title)
+            self.item_types.append(item.category_title)
+        label_item_type = QLabel('Item Type:')
+        self.item_type_box = QComboBox()
+        self.item_type_box.addItems(sorted(list(set(self.item_types))))
+        
+        label_item = QLabel('Item:')
+        self.item_box = QComboBox()
+        self.item_box.addItems(sorted(self.item_names))
+        
+        self.item_info = QTextEdit()
+        self.item_info.setTextInteractionFlags(Qt.TextSelectableByKeyboard | Qt.TextSelectableByMouse)
+        
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        
+        layout = QGridLayout()
+        layout.addWidget(label_item_type, 1, 0)
+        layout.addWidget(self.item_type_box, 1, 1)
+        layout.addWidget(label_item, 10, 0)
+        layout.addWidget(self.item_box, 10, 1)
+        layout.addWidget(self.item_info, 0, 2, 12, 1)
+        layout.addWidget(self.button_box, 20, 0, 1, 3)
+        self.setLayout(layout)
+        
+        self.adjustSize()
+        
 
 
 if __name__ == '__main__':
-    import sys
-    sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/')
-    from nomad_camels.utility import variables_handling
+    configuration.api_key['api_key'] = test_key
+    api_client = elabapi.ApiClient(configuration)
+    api_client.set_default_header(header_name='Authorization', header_value=test_key)
+    
     from PySide6.QtWidgets import QApplication
     app = QApplication(sys.argv)
-    login_to_elab()
+    
+    selector = ItemSelector()
+    selector.exec()
+    
+
+    # its = elabapi.ItemsApi(api_client).read_items()
+    # print('hi')
+    # cats = elabapi.ItemsTypesApi(api_client).read_items_types()
+    # print(cats)
