@@ -1,60 +1,21 @@
-import elabapi_python as elabapi
-from PySide6.QtWidgets import QDialog
-
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit, QGridLayout, QDialogButtonBox
-
-
-configuration = elabapi.Configuration()
-test_key = '2-bfa1f693b02ea88f4cb23d9b059ec85fe66c8686f7eeb61ce4dc49073f0a758ca2dcfb4094f61a9603812'
-configuration.api_key_prefix['api_key'] = 'Authorization'
-configuration.debug = False
-configuration.verify_ssl = False
-configuration.host = 'https://demo.elabftw.net/api/v2'
-
-token = ''
-url = ''
-api_client = None
-
-
-def login_to_elab(parent=None):
-    global url, token, api_client
-    dialog = LoginDialog(parent)
-    if dialog.exec() != QDialog.Accepted:
-        return
-    url = dialog.url
-    token = dialog.token
-    if not url or not token:
-        raise ValueError('No URL or token provided!')
-    configuration.host = url
-    configuration.api_key['api_key'] = token
-
-    api_client = elabapi.ApiClient(configuration)
-    api_client.set_default_header(header_name='Authorization', header_value=token)
-    elabapi.InfoApi(api_client).get_info()
-
-def ensure_login(parent=None):
-    global url, token, api_client
-    elab_settings = get_elab_settings()
-    if elab_settings['url'] != url:
-        logout_of_elab()
-    if not api_client:
-        login_to_elab(parent)
-
-def logout_of_elab():
-    global token, api_client
-    token = ''
-    api_client = None
+import sys
+sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/')
+sys.path.append('C:/Users/od93yces/FAIRmat/')
+sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/nomad_camels')
+sys.path.append(r'C:\Users\od93yces\FAIRmat\CAMELS')
+from nomad_camels.utility import variables_handling
 
 def get_elab_settings():
     """Returns the eLabFTW settings from the preferences."""
-    elab_settings = {}
     if 'extension_settings' in variables_handling.preferences:
         extension_settings = variables_handling.preferences['extension_settings']
         if 'eLabFTW' in extension_settings:
             elab_settings = extension_settings['eLabFTW']
-    if not 'url' in elab_settings:
-        elab_settings['url'] = ''
-    return elab_settings
+            if not 'url' in elab_settings:
+                elab_settings['url'] = ''
+            return elab_settings
+    return {}
 
 
 class LoginDialog(QDialog):
@@ -89,14 +50,3 @@ class LoginDialog(QDialog):
         self.url = self.lineEdit_elab_url.text()
         self.token = self.lineEdit_token.text()
         super().accept()
-
-
-
-
-if __name__ == '__main__':
-    import sys
-    sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/')
-    from nomad_camels.utility import variables_handling
-    from PySide6.QtWidgets import QApplication
-    app = QApplication(sys.argv)
-    login_to_elab()
