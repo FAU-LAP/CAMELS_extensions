@@ -1,1 +1,1 @@
-nomad_camels_extension_eLabFTW==0.1.0
+eLabFTW==0.1.0
