@@ -1,11 +1,5 @@
-# NOMAD-CAMELS Driver for Agilent 34401A
-
-Driver of the Agilent 34401A digital multimeter written for the measurement software [NOMAD-CAMELS](https://fau-lap.github.io/NOMAD-CAMELS/).
-
-## Features
-This driver currently supports measuring the DC and AC voltage and current, as well as resistance measurements in 2- and 4-wire configuration.  
-The settable configuration is the number of PLC for a measurement.
-
+# NOMAD CAMELS Extension for eLabFTW communication
+This extension enables NOMAD CAMELS to communicate with eLabFTW. Including uploading data files.
 
 ## Documentation
 
