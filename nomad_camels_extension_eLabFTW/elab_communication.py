@@ -1,5 +1,7 @@
 import elabapi_python as elabapi
 from PySide6.QtWidgets import QDialog, QComboBox, QTextEdit
+from PySide6.QtCore import Qt
+import yaml
 
 import sys
 sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/')
@@ -8,7 +10,7 @@ from nomad_camels.utility import variables_handling
 
 
 configuration = elabapi.Configuration()
-test_key = '2-bfa1f693b02ea88f4cb23d9b059ec85fe66c8686f7eeb61ce4dc49073f0a758ca2dcfb4094f61a9603812'
+test_key = '2-453b0d3f8637e3dcc68af411905f7df4429e09a7b1c2f815c16b03b93572b5bd26fbbd732f116e1713592'
 configuration.api_key_prefix['api_key'] = 'Authorization'
 configuration.debug = False
 configuration.verify_ssl = False
@@ -24,6 +26,9 @@ def login_to_elab(parent=None):
     dialog = LoginDialog(parent)
     if dialog.exec() != QDialog.Accepted:
         return
+    if dialog.url != url:
+        elab_settings = get_elab_settings()
+        elab_settings['url'] = dialog.url
     url = dialog.url
     token = dialog.token
     if not url or not token:
@@ -33,7 +38,12 @@ def login_to_elab(parent=None):
 
     api_client = elabapi.ApiClient(configuration)
     api_client.set_default_header(header_name='Authorization', header_value=token)
-    elabapi.InfoApi(api_client).get_info()
+    try:
+        elabapi.InfoApi(api_client).get_info()
+    except:
+        token = ''
+        api_client = None
+        raise ValueError('Invalid URL or token!')
 
 def ensure_login(parent=None):
     global url, token, api_client
@@ -51,10 +61,15 @@ def logout_of_elab():
 def get_elab_settings():
     """Returns the eLabFTW settings from the preferences."""
     elab_settings = {}
+    extension_settings = {}
     if 'extension_settings' in variables_handling.preferences:
         extension_settings = variables_handling.preferences['extension_settings']
-        if 'eLabFTW' in extension_settings:
-            elab_settings = extension_settings['eLabFTW']
+    else:
+        variables_handling.preferences['extension_settings'] = extension_settings
+    if 'eLabFTW' in extension_settings:
+        elab_settings = extension_settings['eLabFTW']
+    else:
+        extension_settings['eLabFTW'] = elab_settings
     if not 'url' in elab_settings:
         elab_settings['url'] = ''
     return elab_settings
@@ -77,6 +92,16 @@ def get_item_types(parent=None):
     item_types = elabapi.ItemsTypesApi(api_client).read_items_types()
     return item_types
 
+def get_experiments(parent=None):
+    """Returns the experiments from eLabFTW."""
+    ensure_login(parent)
+    experiments = elabapi.ExperimentsApi(api_client).read_experiments()
+    return experiments
+
+def upload_file(file_path, entity_type, entity_id, parent=None):
+    ensure_login(parent)
+    elabapi.UploadsApi(api_client).post_upload(entity_type, entity_id, file=file_path)
+
 
 class LoginDialog(QDialog):
     """This UI dialog handles the login to elabFTW."""
@@ -89,6 +114,7 @@ class LoginDialog(QDialog):
 
         self.label_token = QLabel('Authentification Token:')
         self.lineEdit_token = QLineEdit()
+        self.lineEdit_token.setEchoMode(QLineEdit.Password)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.button_box.accepted.connect(self.accept)
@@ -148,9 +174,41 @@ class ItemSelector(QDialog):
         layout.addWidget(self.item_info, 0, 2, 12, 1)
         layout.addWidget(self.button_box, 20, 0, 1, 3)
         self.setLayout(layout)
+        self.item_filtering()
+        self.item_change()
         
+        self.item_type_box.currentTextChanged.connect(self.item_filtering)
+        self.item_box.currentTextChanged.connect(self.item_change)
+
         self.adjustSize()
-        
+    
+    def item_filtering(self):
+        item_type = self.item_type_box.currentText()
+        items = []
+        for i, item in enumerate(self.item_names):
+            if self.item_types[i] == item_type:
+                items.append(item)
+        self.item_box.clear()
+        self.item_box.addItems(sorted(items))
+    
+    def get_current_item_data(self):
+        item = self.item_box.currentText()
+        for i, it in enumerate(self.item_names):
+            if it == item:
+                return self.item_metadata[i]
+        return {}
+    
+    def item_change(self):
+        self.item_info.setText(yaml.dump(self.get_current_item_data()))
+    
+    def accept(self):
+        self.sample_data = self.get_current_item_data()
+        self.sample_data['name'] = self.sample_data['_title']
+        super().accept()
+
+
+
+
 
 
 if __name__ == '__main__':
