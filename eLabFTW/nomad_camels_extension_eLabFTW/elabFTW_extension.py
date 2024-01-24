@@ -9,10 +9,12 @@ from PySide6.QtCore import Signal
 EXTENSION_CONFIG = {
     'required_contexts': ['ELN_Context'],
     'name': 'ELabFTW_Extension',
-    'version': '0.1',
+    'version': '0.1.0',
     'dependencies': {
-        'nomad-camels': '>=0.2.4'
-    }
+        'nomad-camels': '>=1.0.0',
+		'elabapi-python': '>=0.5.0'
+    },
+	'settings': {'url': 'https://demo.elabftw.net'}
 }
 
 class ELabFTW_Extension(Extension):
@@ -70,7 +72,8 @@ class ELabFTW_Extension(Extension):
 			self.elab_user_widget.ensure_login()
 		else:
 			self.elab_user_widget.setHidden(True)
-		self.upload_widget.update_boxes()
+		if elab_communication.api_client:
+			self.upload_widget.update_boxes()
 	
 	def user_logged_in_out(self, logged_in:bool):
 		self.show_elab_sample(logged_in)
@@ -152,6 +155,8 @@ class Elab_User_Widget(QWidget):
 			self.logged_in = False
 		else:
 			elab_communication.ensure_login(self)
+			if not elab_communication.api_client:
+				return
 			try:
 				user_info = elab_communication.get_user_information()
 			except:

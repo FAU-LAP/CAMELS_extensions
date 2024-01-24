@@ -8,6 +8,22 @@ sys.path.append('C:/Users/od93yces/FAIRmat/CAMELS/')
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit, QGridLayout, QDialogButtonBox
 from nomad_camels.utility import variables_handling
 
+def get_elab_settings():
+    """Returns the eLabFTW settings from the preferences."""
+    elab_settings = {}
+    extension_settings = {}
+    if 'extension_settings' in variables_handling.preferences:
+        extension_settings = variables_handling.preferences['extension_settings']
+    else:
+        variables_handling.preferences['extension_settings'] = extension_settings
+    if 'eLabFTW' in extension_settings:
+        elab_settings = extension_settings['eLabFTW']
+    else:
+        extension_settings['eLabFTW'] = elab_settings
+    if not 'url' in elab_settings:
+        elab_settings['url'] = ''
+    return elab_settings
+
 
 configuration = elabapi.Configuration()
 test_key = '2-453b0d3f8637e3dcc68af411905f7df4429e09a7b1c2f815c16b03b93572b5bd26fbbd732f116e1713592'
@@ -17,7 +33,7 @@ configuration.verify_ssl = False
 configuration.host = 'https://demo.elabftw.net/api/v2'
 
 token = ''
-url = ''
+url = get_elab_settings()['url']
 api_client = None
 
 
@@ -25,6 +41,7 @@ def login_to_elab(parent=None):
     global url, token, api_client
     dialog = LoginDialog(parent)
     if dialog.exec() != QDialog.Accepted:
+        logout_of_elab()
         return
     if dialog.url != url:
         elab_settings = get_elab_settings()
@@ -57,22 +74,6 @@ def logout_of_elab():
     global token, api_client
     token = ''
     api_client = None
-
-def get_elab_settings():
-    """Returns the eLabFTW settings from the preferences."""
-    elab_settings = {}
-    extension_settings = {}
-    if 'extension_settings' in variables_handling.preferences:
-        extension_settings = variables_handling.preferences['extension_settings']
-    else:
-        variables_handling.preferences['extension_settings'] = extension_settings
-    if 'eLabFTW' in extension_settings:
-        elab_settings = extension_settings['eLabFTW']
-    else:
-        extension_settings['eLabFTW'] = elab_settings
-    if not 'url' in elab_settings:
-        elab_settings['url'] = ''
-    return elab_settings
 
 def get_user_information(parent=None):
     """Returns the user information from eLabFTW."""

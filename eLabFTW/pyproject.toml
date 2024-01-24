@@ -17,6 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "nomad-camels>=1.0.0",
+    "elabftw>=0.1.0",
 ]
 [project.urls]
 "GitHub Page" = "https://github.com/FAU-LAP/CAMELS_extensions"
