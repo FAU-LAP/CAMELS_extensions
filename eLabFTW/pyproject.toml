@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Extension for communication with eLabFTW"
 readme = "README.md"
-requires-python = ">=3.9.6"
+requires-python = ">=3.11.3"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
