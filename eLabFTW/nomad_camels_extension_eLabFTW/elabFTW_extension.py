@@ -88,6 +88,8 @@ class ELabFTW_Extension(Extension):
 		self.upload_widget.setHidden(not logged_in)
 	
 	def upload_data(self, file_path):
+		if elab_communication.api_client is None:
+			return
 		entity_type = self.upload_widget.comboBox_entity_type.currentText()
 		entity_type = 'experiments' if entity_type == 'Experiment' else 'items'
 		entity_name = self.upload_widget.comboBox_entity.currentText()
