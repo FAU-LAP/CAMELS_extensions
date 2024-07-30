@@ -80,7 +80,10 @@ def logout_of_elab():
 def get_user_information(parent=None):
     """Returns the user information from eLabFTW."""
     ensure_login(parent)
-    user = elabapi.UsersApi(api_client).read_user("me")
+    user = {
+        key[1:] if key.startswith("_") else key: value
+        for key, value in elabapi.UsersApi(api_client).read_user("me").__dict__.items()
+    }
     return user
 
 
