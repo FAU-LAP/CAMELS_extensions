@@ -97,6 +97,8 @@ class ELabFTW_Extension(Extension):
         self.user.update(elab_communication.get_user_information())
         self.user["name"] = self.user["fullname"]
         self.upload_widget.update_boxes()
+        if logged_in:
+            self.ELN_Context.selection_function = start_selection_dialog
 
     def show_elab_sample(self, logged_in: bool):
         self.elab_sample_widget.setHidden(not logged_in)
@@ -188,6 +190,15 @@ class Elab_User_Widget(QWidget):
             self.button_log_in_out.setText("eLabFTW logout")
             self.logged_in = True
         self.log_in_out_signal.emit(self.logged_in)
+
+
+def start_selection_dialog(parent):
+    dialog = elab_communication.ItemSelector(parent)
+    if dialog.exec():
+        if not 'lab_id' in dialog.sample_data:
+            dialog.sample_data['lab_id'] = dialog.sample_data['_id']
+        return dialog.sample_data
+    return None
 
 
 class Elab_Sample_Widget(QWidget):
