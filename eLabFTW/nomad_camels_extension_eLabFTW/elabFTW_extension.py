@@ -96,6 +96,8 @@ class ELabFTW_Extension(Extension):
         self.user.clear()
         self.user.update(elab_communication.get_user_information())
         self.user["name"] = self.user["fullname"]
+        self.user["identifier"] = self.user["userid"]
+        self.user["ELN-service"] = "eLabFTW"
         self.upload_widget.update_boxes()
         if logged_in:
             self.ELN_Context.selection_function = start_selection_dialog
@@ -195,8 +197,6 @@ class Elab_User_Widget(QWidget):
 def start_selection_dialog(parent):
     dialog = elab_communication.ItemSelector(parent)
     if dialog.exec():
-        if not 'lab_id' in dialog.sample_data:
-            dialog.sample_data['lab_id'] = dialog.sample_data['_id']
         return dialog.sample_data
     return None
 

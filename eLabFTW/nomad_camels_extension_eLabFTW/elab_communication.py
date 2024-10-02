@@ -223,4 +223,6 @@ class ItemSelector(QDialog):
     def accept(self):
         self.sample_data = self.get_current_item_data()
         self.sample_data["name"] = self.sample_data["_title"]
+        self.sample_data["identifier"] = self.sample_data["_id"]
+        self.sample_data["ELN-service"] = "eLabFTW"
         super().accept()
