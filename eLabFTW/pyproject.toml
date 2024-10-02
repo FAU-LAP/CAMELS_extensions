@@ -16,7 +16,7 @@ classifiers = [
     "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
 ]
 dependencies = [
-    "nomad-camels>=1.0.0",
+    "nomad-camels>=1.4.2",
     "elabapi-python>=5.0.0",
 ]
 [project.urls]
