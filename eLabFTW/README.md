@@ -8,7 +8,7 @@ For more information and documentation visit the NOMAD-CAMELS [documentation](ht
 
 ## Changelog
 
-### 0.1.3
+### 0.1.4
 - Improved metadata for samples and user.
 - Added function to connect with CAMELS' ELN instrument management.
 
