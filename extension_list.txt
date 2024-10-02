@@ -1,1 +1,1 @@
-eLabFTW==0.1.2
+eLabFTW==0.1.4
