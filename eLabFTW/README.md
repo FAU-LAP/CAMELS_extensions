@@ -8,6 +8,9 @@ For more information and documentation visit the NOMAD-CAMELS [documentation](ht
 
 ## Changelog
 
+### 0.1.5
+- Fixed deprecated usage of `ItemsTypesApi` and replaced it with the newer `ItemsTypesResourcesTemplatesApi`.
+
 ### 0.1.4
 - Improved metadata for samples and user.
 - Added function to connect with CAMELS' ELN instrument management.
