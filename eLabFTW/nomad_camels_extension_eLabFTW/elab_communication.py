@@ -97,7 +97,7 @@ def get_items(parent=None):
 def get_item_types(parent=None):
     """Returns the item types from eLabFTW."""
     ensure_login(parent)
-    item_types = elabapi.ItemsTypesApi(api_client).read_items_types()
+    item_types = elabapi.ItemsTypesResourcesTemplatesApi(api_client).read_items_types()
     return item_types
 
 
